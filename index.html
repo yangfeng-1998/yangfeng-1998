@@ -1,117 +1,85 @@
 ﻿<!DOCTYPE html>
-<html>
+<html style="height: 100%">
 <head>
-    <meta charset="UTF-8">
-    <title>echarts</title>
-    <script type="text/javascript" src="jquery.js"></script>
-    <script type="text/javascript" src="echarts.min.js"></script>
-    <style>
-        body, html {
-            width: 99%;
-            height: 99%;
-            font-family: "微软雅黑";
-            font-size: 12px;
-        }
-
-        #someline {
-            width: 100%;
-            height: 99%;
-        }
-    </style>
-    <script>
-      $(document).ready(function(){
-        var chart = document.getElementById("someline");
-        var echart = echarts.init(chart);
-        var base = +new Date(1968, 9, 3);
-        var oneDay = 24 * 3600 * 1000;
-        var date = [];
-
-        var data = [Math.random() * 300];
-
-        for (var i = 1; i < 20000; i++) {
-            var now = new Date(base += oneDay);
-            date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
-            data.push(Math.round((Math.random() - 0.5) * 20 + data[i - 1]));
-        }
-     
-
-        var data = [];
-        var now = +new Date(1997, 9, 3);
-        var oneDay = 24 * 3600 * 1000;
-        var value = Math.random() * 1000;
-        for (var i = 0; i < 1000; i++) {
-            data.push(randomData());
-        }
-
-        function randomData() {
-            now = new Date(+now + oneDay);
-            value = value + Math.random() * 21 - 10;
-            return {
-                name: now.toString(),
-                value: [
-                    [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'),
-                    Math.round(value)
-                ]
-            }
-        }
-
-        option = {
-            title: {
-                text: '动态数据 + 时间坐标轴'
-            },
-            tooltip: {
-                trigger: 'axis',
-                formatter: function (params) {
-                    params = params[0];
-                    var date = new Date(params.name);
-                    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];
-                },
-                axisPointer: {
-                    animation: false
-                }
-            },
-            xAxis: {
-                type: 'time',
-                splitLine: {
-                    show: false
-                }
-            },
-            yAxis: {
-                type: 'value',
-                boundaryGap: [0, '100%'],
-                splitLine: {
-                    show: false
-                }
-            },
-            series: [{
-                name: '模拟数据',
-                type: 'line',
-                showSymbol: false,
-                hoverAnimation: false,
-                data: data
-            }]
-        };
-
-        setInterval(function () {
-
-            for (var i = 0; i < 5; i++) {
-                data.shift();
-                data.push(randomData());
-            }
-
-            echart.setOption({
-                series: [{
-                    data: data
-                }]
-            });
-        }, 1000);
-
-
-        echart.setOption(option);
-      });
-    </script>
+    <meta charset="utf-8">
 </head>
-<body>
-    <div id="someline"></div>
+<body style="height: 100%; margin: 0">
+    <div id="container" style="height: 100%"></div>
+    <script type="text/javascript" src="echarts.min.js"></script>
+
+    <script type="text/javascript">
+        var dom = document.getElementById("container");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+
+        setTimeout(function () {
+
+            option = {
+                legend: {},
+                tooltip: {
+                    trigger: 'axis',
+                    showContent: false
+                },
+                dataset: {
+                    source: [
+                        ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
+                        ['Matcha Latte', 41.1, 30.4, 65.1, 53.3, 83.8, 98.7],
+                        ['Milk Tea', 86.5, 92.1, 85.7, 83.1, 73.4, 55.1],
+                        ['Cheese Cocoa', 24.1, 67.2, 79.5, 86.4, 65.2, 82.5],
+                        ['Walnut Brownie', 55.2, 67.1, 69.2, 72.4, 53.9, 39.1]
+                    ]
+                },
+                xAxis: { type: 'category' },
+                yAxis: { gridIndex: 0 },
+                grid: { top: '55%' },
+                series: [
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    {
+                        type: 'pie',
+                        id: 'pie',
+                        radius: '30%',
+                        center: ['50%', '25%'],
+                        label: {
+                            formatter: '{b}: {@2012} ({d}%)'
+                        },
+                        encode: {
+                            itemName: 'product',
+                            value: '2012',
+                            tooltip: '2012'
+                        }
+                    }
+                ]
+            };
+
+            myChart.on('updateAxisPointer', function (event) {
+                var xAxisInfo = event.axesInfo[0];
+                if (xAxisInfo) {
+                    var dimension = xAxisInfo.value + 1;
+                    myChart.setOption({
+                        series: {
+                            id: 'pie',
+                            label: {
+                                formatter: '{b}: {@[' + dimension + ']} ({d}%)'
+                            },
+                            encode: {
+                                value: dimension,
+                                tooltip: dimension
+                            }
+                        }
+                    });
+                }
+            });
+
+            myChart.setOption(option);
+
+        });;
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    </script>
 </body>
 </html>
